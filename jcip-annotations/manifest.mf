@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: net.jcip.annotations
+OpenIDE-Module-Localizing-Bundle: net/jcip/annotations/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+

@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.tvl.netbeans.zgrviewer
+OpenIDE-Module-Layer: org/tvl/netbeans/zgrviewer/layer.xml
+OpenIDE-Module-Localizing-Bundle: org/tvl/netbeans/zgrviewer/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+
