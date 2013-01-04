@@ -36,6 +36,7 @@ public class GraphVizDataLoader extends UniFileLoader {
         super.initialize();
         ExtensionList extensions = new ExtensionList();
         extensions.addExtension(".dot");
+        extensions.addExtension(".gv");
         extensions.addMimeType("text/x-graphviz");
         setExtensions(extensions);
     }

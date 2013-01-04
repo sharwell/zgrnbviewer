@@ -23,7 +23,7 @@ import org.openide.windows.TopComponent;
 })
 @MIMEResolver.ExtensionRegistration(
     displayName = "#GraphVizResolver",
-    extension="dot",
+    extension={"dot", "gv"},
     mimeType = "text/x-graphviz",
     showInFileChooser = "#GraphVizResolver")
 public class GraphVizDataObject extends MultiDataObject {
