@@ -341,6 +341,11 @@ public class GraphicsManager implements ComponentListener, CameraListener, Java2
 
     }
 
+    public void closeView() {
+        paMngr.stop();
+        paMngr = null;
+    }
+
     public void activateDynaSpot(boolean b, boolean updatePrefs) {
         if (updatePrefs) {
             ConfigManager.DYNASPOT = b;

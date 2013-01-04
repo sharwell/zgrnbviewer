@@ -417,6 +417,7 @@ public final class GraphVizVisualElement extends JPanel implements MultiViewElem
 
     @Override
     public void componentClosed() {
+        grMngr.closeView();
     }
 
     @Override
