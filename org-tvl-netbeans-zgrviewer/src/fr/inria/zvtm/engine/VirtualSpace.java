@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.openide.util.Exceptions;
 
 /**
@@ -94,29 +95,30 @@ public class VirtualSpace {
      */
     CameraManager cm;
     /**
-     * All glyphs in this virtual space, visible or not. Glyph instances.
+     * All glyphs in this virtual space, visible or not.
      */
     List<Glyph> visualEnts;
     /**
      * Visible glyphs. Ordering is important: biggest index gets drawn on
-     * top.<br> Shared by all cameras in the virtual space as it is the same for
+     * top.
+     * <p/>
+     * Shared by all cameras in the virtual space as it is the same for
      * all of them.
      */
     Glyph[] drawingList;
     /**
-     * List of glyphs draw for a given camera. Vector contains Glyph instances.
+     * List of glyphs draw for a given camera.
      */
-    private List<Glyph>[] camera2drawnList;
+    private final CopyOnWriteArrayList<List<Glyph>> camera2drawnList;
     //sharing drawnList was causing a problem ; we now have one for each camera
 
     /**
      * @param n virtual space name
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     VirtualSpace(String n) {
         cm = new CameraManager(this);
         visualEnts = new ArrayList<Glyph>();
-        camera2drawnList = new List[0];
+        camera2drawnList = new CopyOnWriteArrayList<List<Glyph>>();
         drawingList = new Glyph[0];
         spaceName = n;
     }
@@ -150,11 +152,7 @@ public class VirtualSpace {
     public Camera addCamera() {
         Camera c = cm.addCamera();
         //create a new drawnList for it
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        List<Glyph>[] newDrawnListList = new ArrayList[camera2drawnList.length + 1];
-        System.arraycopy(camera2drawnList, 0, newDrawnListList, 0, camera2drawnList.length);
-        newDrawnListList[camera2drawnList.length] = new ArrayList<Glyph>();
-        camera2drawnList = newDrawnListList;
+        camera2drawnList.add(new ArrayList<Glyph>());
         c.setOwningSpace(this);
         for (Iterator<Glyph> e = visualEnts.iterator(); e.hasNext();) {
             Glyph g = e.next();
@@ -183,7 +181,7 @@ public class VirtualSpace {
                 g.removeCamera(i);
             }
             cm.removeCamera(i);
-            camera2drawnList[i] = null;
+            camera2drawnList.set(i, null);
         }
     }
 
@@ -294,8 +292,8 @@ public class VirtualSpace {
      * Get all glyphs actually drawn for a given camera in this virtual space.
      */
     public List<Glyph> getDrawnGlyphs(int cameraIndex) {
-        if (cameraIndex < camera2drawnList.length) {
-            return camera2drawnList[cameraIndex];
+        if (cameraIndex < camera2drawnList.size()) {
+            return camera2drawnList.get(cameraIndex);
         } else {
             return null;
         }
@@ -306,8 +304,8 @@ public class VirtualSpace {
      * compute the list of glyphs under cursor.
      */
     protected void drewGlyph(Glyph gl, int cameraIndex) {
-        if (cameraIndex < camera2drawnList.length && camera2drawnList[cameraIndex] != null) {
-            camera2drawnList[cameraIndex].add(gl);
+        if (cameraIndex < camera2drawnList.size() && camera2drawnList.get(cameraIndex) != null) {
+            camera2drawnList.get(cameraIndex).add(gl);
         }
     }
 
@@ -407,10 +405,10 @@ public class VirtualSpace {
                     ((VCursor)g.stickedTo).unstickSpecificGlyph(g);
                 }
             }
-            for (int i = 0; i < camera2drawnList.length; i++) {
-                if (camera2drawnList[i] != null) {
+            for (int i = 0; i < camera2drawnList.size(); i++) {
+                if (camera2drawnList.get(i) != null) {
                     //camera2drawnlist[i] can be null if camera i has been removed from the virtual space
-                    camera2drawnList[i].remove(g);
+                    camera2drawnList.get(i).remove(g);
                 }
             }
             for (int i = 0; i < cm.cameraList.length; i++) {
