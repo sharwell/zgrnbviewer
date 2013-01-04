@@ -10,11 +10,16 @@ import javax.swing.JComponent;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 @OptionsPanelController.SubRegistration(location = "Advanced",
                                         displayName = "#AdvancedOption_DisplayName_GraphVizOptions",
                                         keywords = "#AdvancedOption_Keywords_GraphVizOptions",
                                         keywordsCategory = "Advanced/GraphVizOptions")
+@NbBundle.Messages({
+    "AdvancedOption_Keywords_GraphVizOptions=graphviz dot",
+    "AdvancedOption_DisplayName_GraphVizOptions=GraphViz"
+})
 public final class GraphVizOptionsPanelController extends OptionsPanelController {
 
     private GraphVizOptionsPanel panel;
