@@ -16,14 +16,48 @@ import org.openide.util.NbBundle;
     "pngOnlyIn140FirstPart=This functionality is only available when running ZGRViewer using a JVM version 1.4.0 or later (it requires the ImageIO API).\nZGRViewer detected JVM version",
     "pngOnlyIn140SecondPart=\nDo you want to proceed anyway (this will probably cause an error)?",
     "VERSION=0.9.0-SNAPSHOT",
-    "about=ZGRViewer {0}\n\nA Visualization Tool for GraphViz based on ZVTM\nhttp://zvtm.sourceforge.net/zgrviewer.html\n\nWritten by Emmanuel Pietriga\n(INRIA project In Situ)\nemmanuel.pietriga@inria.fr",
+    "# {0} - Version",
+    "about=ZGRViewer {0}\n"
+        + "\n"
+        + "A Visualization Tool for GraphViz based on ZVTM\n"
+        + "http://zvtm.sourceforge.net/zgrviewer.html\n"
+        + "\n"
+        + "Written by Emmanuel Pietriga\n"
+        + "(INRIA project In Situ)\n"
+        + "emmanuel.pietriga@inria.fr",
     "customCallHelp=Use %s for source and %t for target:\ne.g. twopi -Tsvg -o %t %s",
     "customCallExprError=Command line expression is missing %s or %t.\n\nUse %s for source and %t for target:\ne.g. twopi -Tsvg -o %t %s",
     "customCallExprError2=An error occured while running the following command line:\n\n",
     "customCallFileError=The source file has not been specified",
+    "# {0} - Source",
     "loadError=An error occured while loading from {0}",
-    "webBrowserHelpText=--------------------------------------\nAUTOMATIC DETECTION\n--------------------------------------\nZGRViewer can try to automatically detect your default web browser.\nThis feature is currently supported under Windows and some POSIX environments.\n\n--------------------------------------\nMANUAL CONFIGURATION\n--------------------------------------\nThe Path value should be the full command line path to your browser's main executable file. It can also be just this file's name if its parent directory is in your PATH environment variable.\n\nExamples:\nmozilla\n/usr/bin/mozilla\nC:\\Program Files\\Internet Explorer\\IEXPLORE.EXE\n\nThe Command Line Options value is an optional field where you can put command line switches, like -remote for the UNIX version of Netscape that will open URLs in an already existing Netscape process (if it exists).\n\nUnder Mac OS X, you can simply use\nopen\nor\nopen -a Safari",
-    "proxyHelpText=If you are behind a firewall, you can manually set the proxy server to access remote resources.\n\nHostname should be the full name of the proxy server.\n\nPort should be the port number used to access external resources. This is a number (default value is 80).",
+    "webBrowserHelpText=--------------------------------------\n"
+        + "AUTOMATIC DETECTION\n"
+        + "--------------------------------------\n"
+        + "ZGRViewer can try to automatically detect your default web browser.\n"
+        + "This feature is currently supported under Windows and some POSIX environments.\n"
+        + "\n"
+        + "--------------------------------------\n"
+        + "MANUAL CONFIGURATION\n"
+        + "--------------------------------------\n"
+        + "The Path value should be the full command line path to your browser's main executable file. It can also be just this file's name if its parent directory is in your PATH environment variable.\n"
+        + "\n"
+        + "Examples:\n"
+        + "mozilla\n"
+        + "/usr/bin/mozilla\n"
+        + "C:\\Program Files\\Internet Explorer\\IEXPLORE.EXE\n"
+        + "\n"
+        + "The Command Line Options value is an optional field where you can put command line switches, like -remote for the UNIX version of Netscape that will open URLs in an already existing Netscape process (if it exists).\n"
+        + "\n"
+        + "Under Mac OS X, you can simply use\n"
+        + "open\n"
+        + "or\n"
+        + "open -a Safari",
+    "proxyHelpText=If you are behind a firewall, you can manually set the proxy server to access remote resources.\n"
+        + "\n"
+        + "Hostname should be the full name of the proxy server.\n"
+        + "\n"
+        + "Port should be the port number used to access external resources. This is a number (default value is 80).",
     "notAFile=The specified path does not point to a file:\n",
     "notADirectory=The specified path does not point to a directory:\n",
     "fileDoesNotExist=This path does not point to any existing file or directory:\n",
