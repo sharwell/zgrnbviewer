@@ -171,9 +171,9 @@ public class VirtualSpace {
      */
     public void removeCamera(int i) {
         if (cm.cameraList.length > i) {
-            for (int j = 0; j < VirtualSpaceManager.INSTANCE.allViews.length; j++) {
-                if (VirtualSpaceManager.INSTANCE.allViews[j].cameras.contains(cm.getCamera(i))) {
-                    VirtualSpaceManager.INSTANCE.allViews[j].destroyCamera(cm.getCamera(i));
+            for (View view : VirtualSpaceManager.INSTANCE.allViews) {
+                if (view.cameras.contains(cm.getCamera(i))) {
+                    view.destroyCamera(cm.getCamera(i));
                 }
             }
             for (Iterator<Glyph> e = visualEnts.iterator(); e.hasNext();) {

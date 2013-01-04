@@ -30,14 +30,18 @@ import fr.inria.zvtm.glyphs.VText;
 import java.awt.AWTEvent;
 import java.awt.event.AWTEventListener;
 import java.awt.event.WindowEvent;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.WeakHashMap;
 import javax.swing.JMenuBar;
+import org.openide.util.WeakSet;
 
 /**
  * Virtual space manager. This is the main entry point to the toolkit. Virtual
@@ -52,8 +56,8 @@ public class VirtualSpaceManager implements AWTEventListener {
      * Called by VText to update default font.
      */
     public void onMainFontUpdated() {
-        for (int i = 0; i < allViews.length; i++) {
-            allViews[i].updateFont();
+        for (View view : allViews) {
+            view.updateFont();
         }
         Object g;
         for (Iterator<VirtualSpace> e = allVirtualSpaces.values().iterator(); e.hasNext();) {
@@ -95,17 +99,15 @@ public class VirtualSpaceManager implements AWTEventListener {
     /**
      * All views managed by this VSM
      */
-    protected View[] allViews;
+    protected final Set<View> allViews = new WeakSet<View>();
     /**
-     * used to quickly retrieve a view by its name (gives its index position in
-     * the list of views)
+     * used to quickly retrieve a view by its name
      */
-    protected Map<String, Integer> name2viewIndex;
+    protected Map<String, WeakReference<View>> name2view;
     /**
      * View which has the focus (or which was the last to have it among all views)
      */
-    View activeView;
-    protected int activeViewIndex = -1;
+    WeakReference<View> activeView;
     /**
      * enables detection of multiple full fills in one view repaint - default
      * value assigned to new views - STILL VERY BUGGY - ONLY SUPPORTS VRectangle
@@ -132,8 +134,7 @@ public class VirtualSpaceManager implements AWTEventListener {
         animationManager = new AnimationManager(this);
         allVirtualSpaces = new HashMap<String, VirtualSpace>();
         virtualSpaceList = new ArrayList<VirtualSpace>(0);
-        allViews = new View[0];
-        name2viewIndex = new HashMap<String, Integer>();
+        name2view = new HashMap<String, WeakReference<View>>();
     }
 
     /**
@@ -200,15 +201,14 @@ public class VirtualSpaceManager implements AWTEventListener {
      * Manually set what view is active.
      */
     public void setActiveView(View v) {
-        activeView = v;
-        activeViewIndex = getViewIndex(v.getName());
+        activeView = new WeakReference<View>(v);
     }
 
     /**
      * Get currently active view.
      */
     public View getActiveView() {
-        return activeView;
+        return activeView.get();
     }
 
     /**
@@ -217,7 +217,12 @@ public class VirtualSpaceManager implements AWTEventListener {
      * @return null if no view is active
      */
     public Camera getActiveCamera() {
-        return (activeView != null) ? activeView.getActiveCamera() : null;
+        View activeView = getActiveView();
+        if (activeView == null) {
+            return null;
+        }
+
+        return activeView.getActiveCamera();
     }
 
     /*
@@ -290,7 +295,7 @@ public class VirtualSpaceManager implements AWTEventListener {
         View v = null;
         if (View.ANONYMOUS.equals(name)) {
             name = UUID.randomUUID().toString();
-            while (name2viewIndex.containsKey(name)) {
+            while (name2view.containsKey(name)) {
                 name = UUID.randomUUID().toString();
             }
         }
@@ -315,7 +320,7 @@ public class VirtualSpaceManager implements AWTEventListener {
     public PView addPanelView(List<Camera> c, String name, String viewType, int w, int h) {
         if (View.ANONYMOUS.equals(name)) {
             name = UUID.randomUUID().toString();
-            while (name2viewIndex.containsKey(name)) {
+            while (name2view.containsKey(name)) {
                 name = UUID.randomUUID().toString();
             }
         }
@@ -329,23 +334,9 @@ public class VirtualSpaceManager implements AWTEventListener {
      * attempts to start the animation manager
      */
     protected void addView(View v) {
-        View[] tmpA = new View[allViews.length + 1];
-        System.arraycopy(allViews, 0, tmpA, 0, allViews.length);
-        tmpA[allViews.length] = v;
-        allViews = tmpA;
-        name2viewIndex.put(v.name, allViews.length - 1);
+        allViews.add(v);
+        name2view.put(v.name, new WeakReference<View>(v));
         animationManager.start(); //starts animationManager if not already running
-    }
-
-    /**
-     * Get index of View whose name is n (-1 if view does not exist) .
-     */
-    protected int getViewIndex(String n) {
-        try {
-            return name2viewIndex.get(n);
-        } catch (NullPointerException ex) {
-            return -1;
-        }
     }
 
     /**
@@ -354,24 +345,27 @@ public class VirtualSpaceManager implements AWTEventListener {
      * @return null if no match
      */
     public View getView(String n) {
-        int index = getViewIndex(n);
-        if (index != -1) {
-            return allViews[index];
-        } else {
+        WeakReference<View> ref = name2view.get(n);
+        if (ref == null) {
             return null;
         }
+
+        if (ref.get() == null) {
+            name2view.remove(n);
+        }
+
+        return ref.get();
     }
 
     /**
      * Destroy a View identified by its index in the list of views.
      */
-    protected void destroyView(int i) {
-        View[] tmpA = new View[allViews.length - 1];
-        if (tmpA.length > 0) {
-            System.arraycopy(allViews, 0, tmpA, 0, i);
-            System.arraycopy(allViews, i + 1, tmpA, i, allViews.length - i - 1);
+    protected void destroyView(View v) {
+        if (v == null) {
+            return;
         }
-        allViews = tmpA;
+
+        allViews.remove(v);
         updateViewIndex();
     }
 
@@ -380,21 +374,9 @@ public class VirtualSpaceManager implements AWTEventListener {
      * complex changes are made to the list of views (like removing a view).
      */
     protected void updateViewIndex() {
-        name2viewIndex.clear();
-        for (int i = 0; i < allViews.length; i++) {
-            name2viewIndex.put(allViews[i].name, new Integer(i));
-        }
-    }
-
-    /**
-     * Destroy a view.
-     */
-    protected void destroyView(View v) {
-        for (int i = 0; i < allViews.length; i++) {
-            if (allViews[i] == v) {
-                destroyView(i);
-                break;
-            }
+        name2view.clear();
+        for (View view : allViews) {
+            name2view.put(view.name, new WeakReference<View>(view));
         }
     }
 
@@ -415,8 +397,8 @@ public class VirtualSpaceManager implements AWTEventListener {
      * @see #repaint(View v, RepaintListener rl)
      */
     public void repaint() {
-        for (int i = 0; i < allViews.length; i++) {
-            allViews[i].repaint();
+        for (View view : allViews) {
+            view.repaint();
         }
     }
 
@@ -543,7 +525,12 @@ public class VirtualSpaceManager implements AWTEventListener {
      * @return null if no camera/view is active
      */
     public VirtualSpace getActiveSpace() {
-        return (activeView != null) ? activeView.getActiveCamera().getOwningSpace() : null;
+        Camera activeCamera = getActiveCamera();
+        if (activeCamera == null) {
+            return null;
+        }
+
+        return activeCamera.getOwningSpace();
     }
 
 }

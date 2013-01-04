@@ -16,6 +16,7 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Rectangle2D;
+import java.lang.ref.WeakReference;
 
 class PeriodicActionManager implements Runnable, MouseMotionListener, Java2DPainter {
 
@@ -26,21 +27,22 @@ class PeriodicActionManager implements Runnable, MouseMotionListener, Java2DPain
     static Font TP_FONT = new Font("Dialog", Font.PLAIN, 10);
     static int TP_PADDING = 4;
     static int TP_MARGIN = 15;
+
     private boolean invalidBounds = true;
-    GraphicsManager grMngr;
-    Thread runTP;
-    long lastMouseMoved = System.currentTimeMillis();
-    Glyph tippedGlyph;
-    String tipLabel;
-    int lX, lY, rX, rY, rW, rH;
-    boolean updatePalette = false;
+    private WeakReference<GraphicsManager> _grMngr;
+    private Thread runTP;
+    private long lastMouseMoved = System.currentTimeMillis();
+    private Glyph tippedGlyph;
+    private String tipLabel;
+    private int lX, lY, rX, rY, rW, rH;
+    private boolean updatePalette = false;
 
     PeriodicActionManager(GraphicsManager gm) {
-        this.grMngr = gm;
+        this._grMngr = new WeakReference<GraphicsManager>(gm);
     }
 
     public void start() {
-        runTP = new Thread(this);
+        runTP = new Thread(this, "ZGRViewer Periodic Action Manager");
         runTP.setPriority(Thread.MIN_PRIORITY);
         runTP.start();
     }
@@ -53,7 +55,7 @@ class PeriodicActionManager implements Runnable, MouseMotionListener, Java2DPain
     @Override
     public void run() {
         Thread me = Thread.currentThread();
-        while (runTP == me) {
+        while (runTP == me && _grMngr.get() != null) {
             updateTooltip();
             checkToolPalette();
             try {
@@ -65,6 +67,11 @@ class PeriodicActionManager implements Runnable, MouseMotionListener, Java2DPain
     }
 
     void updateTooltip() {
+        GraphicsManager grMngr = this._grMngr.get();
+        if (grMngr == null) {
+            return;
+        }
+
         if ((System.currentTimeMillis() - lastMouseMoved) > TOOLTIP_TIME) {
             Glyph g = grMngr.mainView.getPanel().lastGlyphEntered();
             if (g != null && g != grMngr.boundingBox && tippedGlyph != g) {
@@ -83,6 +90,11 @@ class PeriodicActionManager implements Runnable, MouseMotionListener, Java2DPain
     }
 
     void removeTooltip() {
+        GraphicsManager grMngr = this._grMngr.get();
+        if (grMngr == null) {
+            return;
+        }
+
         tipLabel = null;
         tippedGlyph = null;
         invalidBounds = true;
@@ -132,6 +144,11 @@ class PeriodicActionManager implements Runnable, MouseMotionListener, Java2DPain
     }
 
     void checkToolPalette() {
+        GraphicsManager grMngr = this._grMngr.get();
+        if (grMngr == null) {
+            return;
+        }
+
         if (updatePalette) {
             grMngr.getToolPalette().updateHiddenPosition();
             updatePalette = false;
